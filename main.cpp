@@ -6,8 +6,47 @@ char board[3][3] = {{'1','2','3'},{'4','5','6'},{'7','8','9'}};
 int choice;
 int row,column;
 char turn = 'X';
+char player = 'X';
+char opponent = 'x';
 bool draw = false;
 
+
+
+int evaluate1(char board[3][3]){
+    int maxi =0;
+    int mini =0;
+
+    for(int row =0; row<3; row++){
+        if(board[row][0]!= opponent && board[row][1]!= opponent && board[row][2]!= opponent){
+            maxi++;
+        }
+        if(board[row][0]!= player && board[row][1]!= player && board[row][2]!= player){
+            mini++;
+        }
+    }
+    for(int col =0; col<3; col++){
+        if(board[0][col]!= opponent && board[1][col]!= opponent && board[2][col]!= opponent){
+            maxi++;
+        }
+        if(board[0][col]!= player && board[1][col]!= player && board[2][col]!= player){
+            mini++;
+        }
+    }
+    if(board[0][0]!= opponent && board[1][1]!= opponent && board[2][2]!= opponent){
+        maxi++;
+    }
+    if(board[0][0]!= player && board[1][1]!= player && board[2][2]!= player){
+        mini++;
+    }
+    if(board[0][2]!= opponent && board[1][1]!= opponent && board[2][0]!= opponent){
+        maxi++;
+    }
+    if(board[0][2]!= player && board[1][1]!= player && board[2][0]!= player){
+        mini++;
+    }
+
+    return maxi-mini;
+}
 
 
 void display_board(){
@@ -33,6 +72,8 @@ void player_turn(){
         cout << "Player -[O] turn : ";
     }
     cin>> choice;
+    cout<<endl;
+    cout<<evaluate1(board);
 
     switch(choice){
         case 1: row=0; column=0; break;
