@@ -25,8 +25,11 @@ int evaluate1(char **, char);
 int evaluate2(char **, char);
 int evaluate3(char **, char);
 int evaluate4(char **, char);
+int checkWinner(char **, char);
 vector<char **> * moveGen(char *, char);
 char opposite(char);
+
+char player2 = 'O';
 int determineEval(char);
 
 bool draw;
@@ -47,8 +50,9 @@ int main()
             board[i][j] = 'A'+ 2*i - j;
     }
 
-    char player = 'X';
+
     draw = false;
+    char player = 'X';
 
     cout<<"TicTacToe"<<endl;
 
@@ -57,9 +61,20 @@ int main()
     finalPath->PATH->insert(finalPath->PATH->begin(), board);
     printf("final path value: %d\n", finalPath->value);
     printf("final path size: %d\n", finalPath->PATH->size());
+    int lastBoard = finalPath->PATH->size() -1 ;
     for (int i = 0; i < finalPath->PATH->size(); i++) {
         display_board(finalPath->PATH->at(i));
     }
+    int winner = checkWinner(finalPath->PATH->at(lastBoard),player);
+
+    cout<<"___________________________"<<endl;
+    if(winner == 1 )
+        printf("Player X is the winner\n");
+    else if(winner == 2 )
+        printf("Player O is the winner\n");
+    else
+        printf("Draw");
+    cout<<"___________________________\n"<<endl;
 
 
     /*if(player == 'O' && draw == false){
@@ -72,6 +87,41 @@ int main()
         cout<<"GAME DRAW";*/
 }
 
+
+int checkWinner(char **board, char player){
+    for(int row =0; row<3; row++){
+        if(board[row][0]== player && board[row][1]== player && board[row][2]== player){
+            return 1;
+        }
+        if(board[row][0]== player2 && board[row][1]== player2 && board[row][2] == player2){
+            return 2;
+        }
+    }
+    for(int col =0; col<3; col++){
+        if(board[0][col] == player && board[1][col] == player && board[2][col] == player){
+            return 1;
+        }
+        if(board[0][col] == player2 && board[1][col] == player2 && board[2][col] == player2){
+            return 2;
+        }
+    }
+    if(board[0][0] == player && board[1][1] == player && board[2][2] == player){
+        return 1;
+    }
+    if(board[0][0] == player2 && board[1][1] == player2 && board[2][2] == player2){
+        return 2;
+    }
+    if(board[0][2] == player && board[1][1] == player && board[2][0] == player){
+        return 1;
+    }
+    if(board[0][2]!= player2 && board[1][1]!= player2 && board[2][0]!= player2){
+        return 2;
+    }
+    else{
+        return 0;
+    }
+}
+
 //tweaked this one a little bit. i felt like gameover should be true when the game ended
 bool gameover(char **board) {
     //gameover true if either of the following if statements are satisfied
@@ -81,8 +131,8 @@ bool gameover(char **board) {
             return true;
     }
     if ((board[0][0] == board[1][1] && board[0][0] == board[2][2]) || (board[0][2] == board[1][1] && board[0][2] == board[2][0])){
-            return true;
-        }
+        return true;
+    }
 
     //gameover is false if above is not satisfied and there is no draw
     for(int i=0; i<3; i++){
@@ -103,7 +153,7 @@ vector<char **> * moveGen(char **board, char plyr) {
 
     if (plyr == 'X') {
         for (int i = 0; i < 3; i++) {
-			 for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 3; j++) {
                 if (board[i][j] != 'X' && board[i][j] != 'O') {
                     char **tempBoard = new char*[3];
                     char tempVal = board[i][j];
@@ -116,13 +166,13 @@ vector<char **> * moveGen(char **board, char plyr) {
                     moves->push_back(tempBoard);
                     board[i][j] = tempVal;
                 }
-             }
-		}
+            }
+        }
     }
     else {
         for (int i = 0; i < 3; i++)
-		{
-			 for (int j = 0; j < 3; j++) {
+        {
+            for (int j = 0; j < 3; j++) {
                 if (board[i][j] != 'X' && board[i][j] != 'O') {
                     char **tempBoard = new char*[3];
                     char tempVal = board[i][j];
@@ -135,8 +185,8 @@ vector<char **> * moveGen(char **board, char plyr) {
                     moves->push_back(tempBoard);
                     board[i][j] = tempVal;
                 }
-             }
-		}
+            }
+        }
     }
 
     return moves;
@@ -174,7 +224,7 @@ int evaluate1(char **board, char player){
     int mini =0;
 
     //if (gameover(board)) {
-        //return 10;
+    //return 10;
     //}
 
 
@@ -258,7 +308,7 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
         }
     }
 
-    //step 2 in pseudocode
+        //step 2 in pseudocode
     else {
         successors = moveGen(board, plyr);
 
