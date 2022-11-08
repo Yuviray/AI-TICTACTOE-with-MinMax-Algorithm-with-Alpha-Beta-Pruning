@@ -5,7 +5,7 @@
 #include <vector>
 
 //definitions for max depth, X's eval function and O's eval function
-#define deepEnough 3
+#define deepEnough 2
 #define plyrX 1
 #define plyrO 1
 
@@ -17,10 +17,8 @@ struct Pathway {
     vector<char **> * PATH;
 };
 
-Pathway path;
-
 bool gameover(char **);
-Pathway miniMax(char **, int , char, int, int);
+Pathway *miniMax(char **, int , char, int, int);
 void player_turn();
 void display_board(char **);
 int evaluate1(char **, char);
@@ -32,12 +30,12 @@ char opposite(char);
 int determineEval(char);
 
 bool draw;
+vector<char **> *bestPath;
 
 int main()
 {
-
-    path.value = 0;
-    path.PATH = new vector<char **>;
+    Pathway *finalPath;
+    bestPath = new vector<char **>;
     //wanted to minimize global variables
     //some of these may go away depending on how the minimax algo works
     char **board = new char*[3];
@@ -53,11 +51,11 @@ int main()
     cout<<"TicTacToe"<<endl;
 
     display_board(board);
-    miniMax(board, 0, player, numeric_limits<int>::max(), -(numeric_limits<int>::max()));
+    finalPath = miniMax(board, 0, player, 10, -12);
     printf("\n\n\n********************************\n\n\n");
-    printf("%d\n", path.value);
-    for (int i = 0; i < path.PATH->size(); i++) {
-        display_board(path.PATH->at(i));
+    printf("%d\n", finalPath->value);
+    for (int i = 0; i < finalPath->PATH->size(); i++) {
+        display_board(finalPath->PATH->at(i));
     }
 
 
@@ -168,9 +166,13 @@ void display_board(char **board){
 int evaluate1(char **board, char player){
     int maxi =0;
     int mini =0;
+    printf("\nEval for player %c\n", player);
 
-    if (gameover(board))
-        return 100000000;
+    if (gameover(board)) {
+        printf("%d\n", 10);
+        return 10;
+    }
+
 
     for(int row =0; row<3; row++){
         if(board[row][0]!= opposite(player) && board[row][1]!= opposite(player) && board[row][2]!= opposite(player)){
@@ -201,6 +203,7 @@ int evaluate1(char **board, char player){
         mini++;
     }
 
+    printf("%d\n", maxi-mini);
     return maxi-mini;
 }
 
@@ -216,102 +219,117 @@ int evaluate4(char **board, char player) {
     return 2;
 }
 
-//returns a Pathway structure. The structure could probably use a better name
-Pathway miniMax(char **board, int depth, char plyr, int useThr, int passThr) {
-    vector<char **> * successors;
-    int resultSucc, newValue;
+Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
+    vector<char **> *successors;
+    Pathway *retStruct, *resultSucc;
+    int newVal;
     int evalFunc = determineEval(plyr);
 
-    // cout << "*****************************" << endl << endl;
-    // cout << "board at depth :::::::: " << depth << endl << endl;
-    // display_board(board);
-    // cout << endl << endl;
 
-    //if depth is deep enough, returns value of the current node back up the tree
-    //not sure how to handle PATH=nil that is stated in the pseudocode yet, or what he means by that
-    if (depth == deepEnough || gameover(board)){
+    //step 1 in pseudocode
+    if(depth == deepEnough || gameover(board)) {
         switch (evalFunc) {
             case 1:
-                path.value = evaluate1(board, plyr);
-                return path;
+                retStruct = new Pathway;
+                retStruct->PATH = new vector<char **>;
+                retStruct->value = evaluate1(board, plyr);
+                return retStruct;
             case 2:
-                path.value = evaluate2(board, plyr);
-                return path;
+                retStruct = new Pathway;
+                retStruct->PATH = new vector<char **>;
+                retStruct->value = evaluate2(board, plyr);
+                return retStruct;
             case 3:
-                path.value = evaluate3(board, plyr);
-                return path;
+                retStruct = new Pathway;
+                retStruct->PATH = new vector<char **>;
+                retStruct->value = evaluate3(board, plyr);
+                return retStruct;
             case 4:
-                path.value = evaluate4(board, plyr);
-                return path;
+                retStruct = new Pathway;
+                retStruct->PATH = new vector<char **>;
+                retStruct->value = evaluate4(board, plyr);
+                return retStruct;
         }
     }
-    //step 2 in the psuedocode
+
+    //step 2 in pseudocode
     else {
         successors = moveGen(board, plyr);
 
-        //step 3 in the pseudocode
+        //step 3 in pseudocode
         if (successors->size() == 0) {
             switch (evalFunc) {
                 case 1:
-                    path.value = evaluate1(board, plyr);
-                    return path;
+                    retStruct = new Pathway;
+                    retStruct->PATH = new vector<char **>;
+                    retStruct->value = evaluate1(board, plyr);
+                    return retStruct;
                 case 2:
-                    path.value = evaluate2(board, plyr);
-                    return path;
+                    retStruct = new Pathway;
+                    retStruct->PATH = new vector<char **>;
+                    retStruct->value = evaluate2(board, plyr);
+                    return retStruct;
                 case 3:
-                    path.value = evaluate3(board, plyr);
-                    return path;
+                    retStruct = new Pathway;
+                    retStruct->PATH = new vector<char **>;
+                    retStruct->value = evaluate3(board, plyr);
+                    return retStruct;
                 case 4:
-                    path.value = evaluate4(board, plyr);
-                    return path;
+                    retStruct = new Pathway;
+                    retStruct->PATH = new vector<char **>;
+                    retStruct->value = evaluate4(board, plyr);
+                    return retStruct;
             }
         }
 
-        //step 4 in the pseudocode
-        for (unsigned int i = 0; i < successors->size(); i++) {
-            newValue = -miniMax(successors->at(i), depth + 1, opposite(plyr), -passThr, -useThr).value;
-            if (newValue > passThr) {
-                passThr = newValue;
-                vector<char **> *bestPath = new vector<char **>;
-                //copy the successor to a temporary board
+        //step 4 in pseudocode
+        for(int i = 0; i < successors->size(); i++) {
+            //step 4a
+            resultSucc = miniMax(successors->at(i), depth+1, opposite(plyr), -PT, -UT);
+            //step 4b
+            newVal = -resultSucc->value;
+            //step 4c
+            if (newVal > PT) {
+                //step 4ci
+                PT = newVal;
+                //step 4cii
+                //erase bestPath to start fresh
+                bestPath->erase(bestPath->begin(), bestPath->end());
+                //copy successor to tempBoard and append to bestPath
                 char **tempBoard = new char*[3];
-                for (int k = 0; k < 3; k++) {
-                    tempBoard[k] = new char[3];
-                    for (int l = 0; l < 3; l++)
-                        tempBoard[k][l] = successors->at(i)[k][l];
+                for (int j = 0; j < 3; j++) {
+                    tempBoard[j] = new char[3];
+                    for (int k = 0; k < 3; k++) {
+                        tempBoard[j][k] = successors->at(i)[j][k];
+                    }
                 }
-                //push the temporary board to bestPath
                 bestPath->push_back(tempBoard);
                 delete tempBoard;
-                //copy the path it took to get here to bestPath
-                for (int j = 0; j < path.PATH->size(); j++) {
-                    char **tempBoard = new char*[3];
-                    for (int k = 0; k < 3; k++) {
-                        tempBoard[k] = new char[3];
-                        for (int l = 0; l < 3; l++)
-                            tempBoard[k][l] = path.PATH->at(j)[k][l];
+                //copy each element of resultSucc->PATH to tempBoard and append to bestPath
+                if (resultSucc->PATH->size() > 0) {
+                    for (int j = 0; j < resultSucc->PATH->size(); j++) {
+                        char **tempBoard = new char*[3];
+                        for (int k = 0; k < 3; k++) {
+                            tempBoard[k] = new char[3];
+                            for (int l = 0; l < 3; l++) {
+                                tempBoard[k][l] = resultSucc->PATH->at(j)[k][l];
+                            }
+                        }
+                        bestPath->push_back(tempBoard);
+                        delete tempBoard;
                     }
-                    bestPath->push_back(tempBoard);
-                    delete tempBoard;
                 }
-
-                printf("\n\n\nBest Path Size:::::::: %d\n\n\n", bestPath->size());
-
-                if (passThr >= useThr) {
-                    path.value = passThr;
-                    path.PATH->erase(path.PATH->begin(), path.PATH->end());
-                    for (int m = 0; m < bestPath->size(); m++) {
-                        path.PATH->push_back(bestPath->at(m));
-                    }
-                    delete bestPath;
-                    return path;
-                }
-                delete bestPath;
-
             }
-
+            //step 4d
+            else {
+                retStruct->value = PT;
+                retStruct->PATH = bestPath;
+                return retStruct;
+            }
         }
-        //step 5 in the pseudocode
-        return path;
+        //step 5
+        retStruct->value = PT;
+        retStruct->PATH = bestPath;
+        return retStruct;
     }
 }
