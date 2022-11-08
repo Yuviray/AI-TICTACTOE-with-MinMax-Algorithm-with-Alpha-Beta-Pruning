@@ -5,7 +5,7 @@
 #include <vector>
 
 //definitions for max depth, X's eval function and O's eval function
-#define deepEnough 2
+#define deepEnough 4
 #define plyrX 1
 #define plyrO 1
 
@@ -35,7 +35,6 @@ vector<char **> *bestPath;
 int main()
 {
     Pathway *finalPath;
-    bestPath = new vector<char **>;
     //wanted to minimize global variables
     //some of these may go away depending on how the minimax algo works
     char **board = new char*[3];
@@ -52,7 +51,7 @@ int main()
 
     display_board(board);
     finalPath = miniMax(board, 0, player, 10, -12);
-    printf("\n\n\n********************************\n\n\n");
+    printf("\n\n\nback in main\n\n\n");
     printf("%d\n", finalPath->value);
     for (int i = 0; i < finalPath->PATH->size(); i++) {
         display_board(finalPath->PATH->at(i));
@@ -166,10 +165,9 @@ void display_board(char **board){
 int evaluate1(char **board, char player){
     int maxi =0;
     int mini =0;
-    printf("\nEval for player %c\n", player);
 
     if (gameover(board)) {
-        printf("%d\n", 10);
+        printf("gameover board!!!!!!!\n");
         return 10;
     }
 
@@ -203,7 +201,6 @@ int evaluate1(char **board, char player){
         mini++;
     }
 
-    printf("%d\n", maxi-mini);
     return maxi-mini;
 }
 
@@ -225,9 +222,12 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
     int newVal;
     int evalFunc = determineEval(plyr);
 
-
     //step 1 in pseudocode
     if(depth == deepEnough || gameover(board)) {
+        if (gameover(board)) {
+            printf("\n\nhere because game is over!!!!!!!!!\n\n");
+            display_board(board);
+        }
         switch (evalFunc) {
             case 1:
                 retStruct = new Pathway;
@@ -293,35 +293,27 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
                 //step 4ci
                 PT = newVal;
                 //step 4cii
-                //erase bestPath to start fresh
-                bestPath->erase(bestPath->begin(), bestPath->end());
-                //copy successor to tempBoard and append to bestPath
-                char **tempBoard = new char*[3];
-                for (int j = 0; j < 3; j++) {
-                    tempBoard[j] = new char[3];
-                    for (int k = 0; k < 3; k++) {
-                        tempBoard[j][k] = successors->at(i)[j][k];
+                //assign bestPath to pathway of resultSucc
+                bestPath = resultSucc->PATH;
+                printf("\n\nbest path at depth: %d and successor : %d\n\n", depth, i);
+                if (bestPath->size() == 0) {
+                    printf("best path is empty!!!!\n\n");
+                }
+                else {
+                    for (int r = 0; r < bestPath->size(); r++) {
+                        display_board(bestPath->at(r));
                     }
                 }
-                bestPath->push_back(tempBoard);
-                delete tempBoard;
-                //copy each element of resultSucc->PATH to tempBoard and append to bestPath
-                if (resultSucc->PATH->size() > 0) {
-                    for (int j = 0; j < resultSucc->PATH->size(); j++) {
-                        char **tempBoard = new char*[3];
-                        for (int k = 0; k < 3; k++) {
-                            tempBoard[k] = new char[3];
-                            for (int l = 0; l < 3; l++) {
-                                tempBoard[k][l] = resultSucc->PATH->at(j)[k][l];
-                            }
-                        }
-                        bestPath->push_back(tempBoard);
-                        delete tempBoard;
-                    }
+                //append succ to bestPath
+                bestPath->push_back(successors->at(i));
+                printf("\n\nBest path after appending successor\n\n");
+                for (int r = 0; r < bestPath->size(); r++) {
+                        display_board(bestPath->at(r));
                 }
             }
             //step 4d
             else {
+                retStruct = new Pathway;
                 retStruct->value = PT;
                 retStruct->PATH = bestPath;
                 return retStruct;
