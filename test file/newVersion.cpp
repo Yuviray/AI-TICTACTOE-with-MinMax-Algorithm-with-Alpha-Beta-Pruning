@@ -53,8 +53,8 @@ int main()
     cout<<"TicTacToe"<<endl;
 
     display_board(board);
-    finalPath = miniMax(board, 0, player, 10, -8);
-    printf("\n\n\nback in main\n\n\n");
+    finalPath = miniMax(board, 0, player, 12, -10);
+    finalPath->PATH->insert(finalPath->PATH->begin(), board);
     printf("final path value: %d\n", finalPath->value);
     printf("final path size: %d\n", finalPath->PATH->size());
     for (int i = 0; i < finalPath->PATH->size(); i++) {
@@ -173,9 +173,9 @@ int evaluate1(char **board, char player){
     int maxi =0;
     int mini =0;
 
-    if (gameover(board)) {
-        return 10;
-    }
+    //if (gameover(board)) {
+        //return 10;
+    //}
 
 
     for(int row =0; row<3; row++){
@@ -233,11 +233,6 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
     //display_board(board);
 
     //step 1 in pseudocode
-    if (depth == deepEnough) {
-        printf("\n\n\n\nWE MADE IT DEEEEEEP\n\n\n\n");
-        display_board(board);
-    }
-
     if(depth == deepEnough || gameover(board)) {
         switch (evalFunc) {
             case 1:
@@ -305,7 +300,8 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
             //step 4b
             newVal = -resultSucc->value;
             //step 4c
-
+            //printf("PT BEFORE : %d at depth %d\n", PT, depth);
+            //cout << "BEST PATH ADDY at " << depth << " : " << bestPath << endl;
             if (newVal > PT) {
 
                 //step 4ci
@@ -313,18 +309,19 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
                 //step 4cii
                 //assign bestPath to pathway of resultSucc
                 bestPath = resultSucc->PATH;
-                if (bestPath == NULL) {
-                    printf("best path is null\n");
-                    printf("depth is %d\n", depth);
-                    printf("i is : %d\n", i);
-                    printf("successor size is: %d\n", successors->size());
-                    printf("Successor board 0 is: \n");
-                    display_board(successors->at(0));
-                    printf("Successor board 1 is: \n");
-                    display_board(successors->at(1));
-                    printf("board is:\n");
-                    display_board(board);
-                }
+                // if (bestPath == NULL) {
+                //     printf("best path is null\n");
+                //     printf("UT : %d *** PT : %d\n", UT, PT);
+                //     printf("depth is %d\n", depth);
+                //     printf("i is : %d\n", i);
+                //     printf("successor size is: %d\n", successors->size());
+                //     printf("Successor board 0 is: \n");
+                //     display_board(successors->at(0));
+                //     printf("Successor board 1 is: \n");
+                //     display_board(successors->at(1));
+                //     printf("board is:\n");
+                //     display_board(board);
+                // }
 
                 //append succ to bestPath
 
@@ -334,6 +331,9 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
             }
             //step 4d
             if (PT >= UT) {
+                //printf("\nwe trimmed the hedges\n");
+                //printf("UT : %d *** PT : %d\n", UT, PT);
+                //display_board(board);
                 break;
             }
         }
@@ -343,8 +343,6 @@ Pathway *miniMax(char **board, int depth, char plyr, int UT, int PT) {
         retStruct = new Pathway;
         retStruct->value = PT;
         retStruct->PATH = bestPath;
-        //printf("\n\n**********DEPTH : %d***************\n", depth);
-        //display_board(board);
         return retStruct;
     }
 }
