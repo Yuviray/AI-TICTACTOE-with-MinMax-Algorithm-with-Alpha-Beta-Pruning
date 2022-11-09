@@ -1,0 +1,62 @@
+int evaluate_MS(char board[3][3], char player, char opp) {
+    int MS_board[3][3] = {{8, 3, 4}, {1, 5, 9}, {6, 7, 2}};
+    vector<int> moves_p, moves_o, winMoves, lossMoves;
+
+    //accumulating the values for each player's moves
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (board[i][j] == player) {
+                moves_p.push_back(MS_board[i][j]);
+            }
+            if (board[i][j] == opp) {
+                moves_o.push_back(MS_board[i][j]);
+            }
+        }
+    }
+
+    //accumlating winning moves
+    if (moves_p.size() > 2) {
+        for (int i = 0; i < moves_p.size()-1; i++) {
+            for (int j = i+1; j < moves_p.size(); j++) {
+                int m = 15 - (moves_p[i] + moves_p[j]);
+                if (m > 0 && m < 10) {
+                    winMoves.push_back(m);
+                }
+            }
+        }
+    }
+    //accumulating losing moves
+    if (moves_o.size() > 2) {
+        for (int i = 0; i < moves_o.size()-1; i++) {
+            for (int j = i+1; j < moves_o.size(); j++) {
+                int m = 15 - (moves_o[i] + moves_o[j]);
+                if (m > 0 && m < 10) {
+                    lossMoves.push_back(m);
+                }
+            }
+        }
+    }
+    //evaluating the accumulated moves
+    //check for wins
+    if (winMoves.size() > 0) {
+        for (int i = 0; i < winMoves.size(); i++) {
+            for (int j = 0; j < moves_p.size(); j++) {
+                if (winMoves[i] == moves_p[j]) {
+                    return 1;
+                }
+            }
+        }
+    }
+    //check for losses
+    if (lossMoves.size() > 0) {
+        for (int i = 0; i < lossMoves.size(); i++) {
+            for (int j = 0; j < moves_o.size(); j++) {
+                if (lossMoves[i] == moves_o[j]) {
+                    return -1;
+                }
+            }
+        }
+    }
+    //return 0 if no win or loss
+    return 0;
+}
