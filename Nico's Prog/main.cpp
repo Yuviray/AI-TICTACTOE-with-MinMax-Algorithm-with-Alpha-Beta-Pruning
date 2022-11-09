@@ -137,15 +137,67 @@ int evaluate1(char board[3][3], char player, char opp){
     return maxi-mini;
 }
 
-int evaluation2(){
-    if (xWin) {
-        xWin = false;
-        return -1;
-    } else if (oWin) {
-        oWin = false;
-        return 1;
-    } else {
-        return 0;
+int evaluate2(char player){
+    if(player == 'X') {
+        if (xWin) {
+            xWin = false;
+            return 1;
+        } else if (oWin) {
+            oWin = false;
+            return -1;
+        } else {
+            return 0;
+        }
+    }else if(player == 'O'){
+        if (oWin) {
+            oWin = false;
+            return 1;
+        } else if (xWin) {
+            xWin = false;
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+}
+
+int evaluate3(char board[3][3], char player, int depth){
+    if(player == 'X') {
+        if (xWin) {
+            xWin = false;
+            for (int i = 0; i < 9; i++) {
+                if (depth == i) {
+                    return 11 + i;
+                }
+            }
+        } else if (oWin) {
+            oWin = false;
+            for (int i = 0; i < 9; i++) {
+                if (depth == i) {
+                    return -11 - i;
+                }
+            }
+        } else {
+            return 0;
+        }
+    }else if(player == 'O'){
+        if (oWin) {
+            oWin = false;
+            for (int i = 0; i < 9; i++) {
+                if (depth == i) {
+                    return 11 + i;
+                }
+            }
+        } else if (xWin) {
+            xWin = false;
+            for (int i = 0; i < 9; i++) {
+                if (depth == i) {
+                    return -11 - i;
+                }
+            }
+        } else {
+            return 0;
+        }
     }
 }
 
@@ -154,7 +206,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
     int bestScore;
     if(turn == 'X') {
         if(!gameover()) {
-            return evaluate1(board, 'X', 'O');
+            return evaluate3(board,'X',depth);
         }
         if (player == 'X') {
             bestScore = -INT_MAX;
@@ -205,7 +257,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
         }
     }else if (turn == 'O'){
         if (!gameover()) {
-           return evaluate1(board, 'O', 'X');
+            return evaluate3(board,'O',depth);
         }
         if (player == 'O') {
             bestScore = -INT_MAX;
