@@ -37,40 +37,14 @@ void display_board(){
 //Function to get the player input and update the board
 void bestMove();
 void player_turn(){
-    if(turn == 'O'){
-        cout<<"Player - 1 [O] turn : ";
-        cin>> choice;
-        switch(choice){
-            case 1: row=0; column=0; break;
-            case 2: row=0; column=1; break;
-            case 3: row=0; column=2; break;
-            case 4: row=1; column=0; break;
-            case 5: row=1; column=1; break;
-            case 6: row=1; column=2; break;
-            case 7: row=2; column=0; break;
-            case 8: row=2; column=1; break;
-            case 9: row=2; column=2; break;
-            default:
-                cout<<"Invalid Move";
-        }
-        if(turn == 'X' && board[row][column] != 'X' && board[row][column] != 'O'){
-            //updating the position for 'X' symbol if
-            //it is not already occupied
-            board[row][column] = 'X';
-            turn = 'O';
-        }else if(turn == 'O' && board[row][column] != 'X' && board[row][column] != 'O'){
-            //updating the position for 'O' symbol if
-            //it is not already occupied
-            board[row][column] = 'O';
-            turn = 'X';
-        }else {
-            //if input position already filled
-            cout<<"Box already filled! Please choose another!!";
-            player_turn();
-        }
+    if(turn == 'X'){
+        cout<<"Player - 1 [X] turn : ";
+        bestMove();
+        cout << allTries << " tries" << endl;
+        allTries = 0;
     }
-    else if(turn == 'X'){
-        cout<<"Player - 2 [X] turn : ";
+    else if(turn == 'O'){
+        cout<<"Player - 2 [O] turn : ";
         bestMove();
         cout << allTries << " tries" << endl;
         allTries = 0;
@@ -82,89 +56,204 @@ void player_turn(){
 void bestMove(){
     int bestScore = -INT_MAX;
     int score = 0;
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++){
-            if(board[i][j] != 'X' && board[i][j] != 'O')
-            {
-                char temp = board[i][j];
-                board[i][j] = 'X';
-                score = miniMax(board,0,'O', INT_MIN, INT_MAX);
-                board[i][j] = temp;
-                if(score > bestScore){
-                    bestScore = score;
-                    bestRow = i;
-                    bestCol = j;
+    if(turn == 'X') {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] != 'X' && board[i][j] != 'O') {
+                    char temp = board[i][j];
+                    board[i][j] = 'X';
+                    score = miniMax(board, 0, 'O', INT_MIN, INT_MAX);
+                    board[i][j] = temp;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestRow = i;
+                        bestCol = j;
+                    }
                 }
             }
         }
+        cout << bestScore << endl;
+        board[bestRow][bestCol] = 'X';
+        turn = 'O';
+    }else if(turn == 'O'){
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] != 'X' && board[i][j] != 'O') {
+                    char temp = board[i][j];
+                    board[i][j] = 'O';
+                    score = miniMax(board, 0, 'X', INT_MIN, INT_MAX);
+                    board[i][j] = temp;
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestRow = i;
+                        bestCol = j;
+                    }
+                }
+            }
+        }
+        cout << bestScore << endl;
+        board[bestRow][bestCol] = 'O';
+        turn = 'X';
     }
-    cout << bestScore << endl;
-    board[bestRow][bestCol] = 'X';
-    turn = 'O';
+    xWin =false;
+    oWin = false;
+    draw = false;
+}
+
+int evaluate1(char board[3][3], char player, char opp){
+    int maxi =0;
+    int mini =0;
+
+    char opponent = opp;
+    for(int row =0; row < 3; row++){
+        if(board[row][0]!= opponent   && board[row][1]!= opponent  && board[row][2]!= opponent ){
+            maxi++;
+        }
+        if(board[row][0]!= player && board[row][1]!= player && board[row][2]!= player){
+            mini++;
+        }
+    }
+    for(int col =0; col<3; col++){
+        if(board[0][col]!= opponent  && board[1][col]!= opponent  && board[2][col]!= opponent ){
+            maxi++;
+        }
+        if(board[0][col]!= player && board[1][col]!= player && board[2][col]!= player){
+            mini++;
+        }
+    }
+    if(board[0][0]!= opponent  && board[1][1]!= opponent  && board[2][2]!= opponent ){
+        maxi++;
+    }
+    if(board[0][0]!= player && board[1][1]!= player && board[2][2]!= player){
+        mini++;
+    }
+    if(board[0][2]!= opponent  && board[1][1]!= opponent  && board[2][0]!= opponent ){
+        maxi++;
+    }
+    if(board[0][2]!= player && board[1][1]!= player && board[2][0]!= player){
+        mini++;
+    }
+
+    return maxi-mini;
+}
+
+int evaluation2(){
+    if (xWin) {
+        xWin = false;
+        return -1;
+    } else if (oWin) {
+        oWin = false;
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int miniMax(char board[3][3], int depth, char player, int use, int pass){
     int score;
     int bestScore;
-    if(!gameover()) {
-        if (xWin) {
-            xWin = false;
-            return 1;
-        } else if (oWin) {
-            oWin = false;
-            return -1;
-        } else{
-            return 0;
+    if(turn == 'X') {
+        if(!gameover()) {
+            return evaluate1(board, 'X', 'O');
         }
-    }
-    if(player == 'X'){
-        bestScore = -INT_MAX;
-        for(int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(board[i][j] != 'X' && board[i][j] != 'O')
-                {
-                    char temp = board[i][j];
-                    board[i][j] = 'X';
-                    score = miniMax(board,depth+1, 'O', -pass,-use);
-                    board[i][j] = temp;
-                    if(score > bestScore){
-                        bestScore = score;
+        if (player == 'X') {
+            bestScore = -INT_MAX;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] != 'X' && board[i][j] != 'O') {
+                        char temp = board[i][j];
+                        board[i][j] = 'X';
+                        score = miniMax(board, depth + 1, 'O', -pass, -use);
+                        board[i][j] = temp;
+                        if (score > bestScore) {
+                            bestScore = score;
+                        }
+                        if (score > use) {
+                            use = score;
+                        }
+                        if (pass <= use) {
+                            break;
+                        }
+                        allTries++;
                     }
-                    if(score > use){
-                        use = score;
-                    }
-                    if(pass <= use){
-                        break;
-                    }
-                    allTries++;
                 }
             }
-        }
-        return bestScore;
-    }else{
-        bestScore = INT_MAX;
-        for(int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(board[i][j] != 'X' && board[i][j] != 'O')
-                {
-                    char temp = board[i][j];
-                    board[i][j] = 'O';
-                    score = miniMax(board, depth+1, 'X', -use, -pass);
-                    board[i][j] = temp;
-                    if(score < bestScore){
-                        bestScore = score;
+            return bestScore;
+        } else {
+            bestScore = INT_MAX;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] != 'X' && board[i][j] != 'O') {
+                        char temp = board[i][j];
+                        board[i][j] = 'O';
+                        score = miniMax(board, depth + 1, 'X', -use, -pass);
+                        board[i][j] = temp;
+                        if (score < bestScore) {
+                            bestScore = score;
+                        }
+                        if (score < pass) {
+                            use = score;
+                        }
+                        if (pass <= use) {
+                            break;
+                        }
+                        allTries++;
                     }
-                    if(score < pass){
-                        use = score;
-                    }
-                    if(pass <= use){
-                        break;
-                    }
-                    allTries++;
                 }
             }
+            return bestScore;
         }
-        return bestScore;
+    }else if (turn == 'O'){
+        if (!gameover()) {
+           return evaluate1(board, 'O', 'X');
+        }
+        if (player == 'O') {
+            bestScore = -INT_MAX;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] != 'X' && board[i][j] != 'O') {
+                        char temp = board[i][j];
+                        board[i][j] = 'O';
+                        score = miniMax(board, depth + 1, 'X', -pass, -use);
+                        board[i][j] = temp;
+                        if (score > bestScore) {
+                            bestScore = score;
+                        }
+                        if (score > use) {
+                            use = score;
+                        }
+                        if (pass <= use) {
+                            break;
+                        }
+                        allTries++;
+                    }
+                }
+            }
+            return bestScore;
+        } else {
+            bestScore = INT_MAX;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] != 'X' && board[i][j] != 'O') {
+                        char temp = board[i][j];
+                        board[i][j] = 'X';
+                        score = miniMax(board, depth + 1, 'O', -use, -pass);
+                        board[i][j] = temp;
+                        if (score < bestScore) {
+                            bestScore = score;
+                        }
+                        if (score < pass) {
+                            use = score;
+                        }
+                        if (pass <= use) {
+                            break;
+                        }
+                        allTries++;
+                    }
+                }
+            }
+            return bestScore;
+        }
     }
 }
 //Function to get the game status e.g. GAME WON, GAME DRAW GAME IN CONTINUE MODE
