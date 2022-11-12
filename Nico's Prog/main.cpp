@@ -1,5 +1,8 @@
 #include <iostream>
 #include <cstdlib>
+#include <limits.h>
+#include <unistd.h>
+#include <sys/types.h>
 using namespace std;
 //Array for the board
 char board[3][3] = {{'1','2','3'},{'4','5','6'},{'7','8','9'}};
@@ -13,6 +16,7 @@ int miniMax(char board[3][3], int depth, char player, int alpha, int beta);
 int bestRow= 0;
 int bestCol = 0;
 int allTries = 0;
+int totalTries = 0;
 bool xWin = false;
 bool oWin = false;
 bool gameover();
@@ -41,12 +45,14 @@ void player_turn(){
         cout<<"Player - 1 [X] turn : ";
         bestMove();
         cout << allTries << " tries" << endl;
+	totalTries += allTries;
         allTries = 0;
     }
     else if(turn == 'O'){
         cout<<"Player - 2 [O] turn : ";
         bestMove();
         cout << allTries << " tries" << endl;
+	totalTries += allTries;
         allTries = 0;
     }
 }
@@ -239,6 +245,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         char temp = board[i][j];
                         board[i][j] = 'O';
                         score = miniMax(board, depth + 1, 'X', -use, -pass);
+			allTries++;
                         board[i][j] = temp;
                         if (score < bestScore) {
                             bestScore = score;
@@ -248,8 +255,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         }
                         if (pass <= use) {
                             break;
-                        }
-                        allTries++;
+                        } 
                     }
                 }
             }
@@ -267,6 +273,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         char temp = board[i][j];
                         board[i][j] = 'O';
                         score = miniMax(board, depth + 1, 'X', -pass, -use);
+			allTries++;
                         board[i][j] = temp;
                         if (score > bestScore) {
                             bestScore = score;
@@ -277,7 +284,6 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         if (pass <= use) {
                             break;
                         }
-                        allTries++;
                     }
                 }
             }
@@ -360,6 +366,8 @@ bool gameover(){
 
 int main()
 {
+    pid_t pid;
+    pid = getpid();
     cout<<"T I C K -- T A C -- T O E -- G A M E" << endl;
     cout<<"FOR 2 PLAYERS" << endl;
     while(gameover()){
@@ -380,4 +388,9 @@ int main()
         cout << "GAME DRAW!!!" << endl;
         display_board();
     }
+
+    cout << "Total tries for both players: " << totalTries << endl;
+    cout << "Process ID for this program: " << pid << endl;
+    system("ps u");
+    return 0;
 }
