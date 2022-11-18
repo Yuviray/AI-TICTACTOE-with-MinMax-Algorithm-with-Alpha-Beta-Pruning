@@ -3,6 +3,9 @@
 #include <limits.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <fstream>
+
+
 using namespace std;
 //Array for the board
 char board[3][3] = {{'1','2','3'},{'4','5','6'},{'7','8','9'}};
@@ -16,13 +19,16 @@ int miniMax(char board[3][3], int depth, char player, int alpha, int beta);
 int bestRow= 0;
 int bestCol = 0;
 int allTries = 0;
+int allTriesP = 0;
 int totalTries = 0;
+int totalTriesP = 0;
 bool xWin = false;
 bool oWin = false;
 bool gameover();
 int totalTime1 = 0;
 int totalTime2 = 0;
 //Function to show the current status of the gaming board
+
 
 void display_board(){
 
@@ -49,9 +55,12 @@ void player_turn(){
         bestMove();
         int stop_s = clock();
         totalTime1 += (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
-        cout << allTries << " tries" << endl;
+        cout << allTries << " Nodes Generated" << endl;
         totalTries += allTries;
         allTries = 0;
+        cout << allTriesP << " Nodes Generated after Prune" << endl;
+        totalTriesP += allTriesP;
+        allTriesP = 0;
 
     }
     else if(turn == 'O'){
@@ -60,9 +69,12 @@ void player_turn(){
         bestMove();
         int stop_s = clock();
         totalTime2 += (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
-        cout << allTries << " tries" << endl;
+        cout << allTries << " Nodes Generated" << endl;
         totalTries += allTries;
         allTries = 0;
+        cout << allTriesP << " Nodes Generated after Prune" << endl;
+        totalTriesP += allTriesP;
+        allTriesP = 0;
     }
 }
 
@@ -232,6 +244,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         board[i][j] = 'X';
                         score = miniMax(board, depth + 1, 'O', -pass, -use);
                         board[i][j] = temp;
+                        allTries++;
                         if (score > bestScore) {
                             bestScore = score;
                         }
@@ -241,7 +254,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         if (pass <= use) {
                             break;
                         }
-                        allTries++;
+                        allTriesP++;
                     }
                 }
             }
@@ -265,6 +278,8 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         if (pass <= use) {
                             break;
                         }
+                        allTriesP++;
+
                     }
                 }
             }
@@ -293,6 +308,8 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         if (pass <= use) {
                             break;
                         }
+                        allTriesP++;
+
                     }
                 }
             }
@@ -306,6 +323,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         board[i][j] = 'X';
                         score = miniMax(board, depth + 1, 'O', -use, -pass);
                         board[i][j] = temp;
+                        allTries++;
                         if (score < bestScore) {
                             bestScore = score;
                         }
@@ -315,7 +333,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         if (pass <= use) {
                             break;
                         }
-                        allTries++;
+                        allTriesP++;
                     }
                 }
             }
@@ -400,11 +418,15 @@ int main()
         display_board();
     }
 
-    cout << "Total tries for both players: " << totalTries << endl;
+    cout << "Total Nodes Generated for both players: " << totalTries << endl;
+    cout << "Total Nodes Generated after Pruning for both players: " << totalTriesP << endl;
     cout << "Process ID for this program: " << pid << endl;
     cout << "Program took " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << " ms\n";
     cout << "Time for player X : " << totalTime1 << " ms" << endl;
     cout << "Time for player O : " << totalTime2 << " ms" << endl;
+
+
+
     //system("ps u");
     return 0;
 }
