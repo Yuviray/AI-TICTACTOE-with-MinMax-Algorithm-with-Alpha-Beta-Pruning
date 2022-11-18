@@ -20,6 +20,8 @@ int totalTries = 0;
 bool xWin = false;
 bool oWin = false;
 bool gameover();
+int totalTime1 = 0;
+int totalTime2 = 0;
 //Function to show the current status of the gaming board
 
 void display_board(){
@@ -43,16 +45,23 @@ void bestMove();
 void player_turn(){
     if(turn == 'X'){
         cout<<"Player - 1 [X] turn : ";
+        int start_s = clock();
         bestMove();
+        int stop_s = clock();
+        totalTime1 += (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
         cout << allTries << " tries" << endl;
-	totalTries += allTries;
+        totalTries += allTries;
         allTries = 0;
+
     }
     else if(turn == 'O'){
         cout<<"Player - 2 [O] turn : ";
+        int start_s = clock();
         bestMove();
+        int stop_s = clock();
+        totalTime2 += (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
         cout << allTries << " tries" << endl;
-	totalTries += allTries;
+        totalTries += allTries;
         allTries = 0;
     }
 }
@@ -245,7 +254,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         char temp = board[i][j];
                         board[i][j] = 'O';
                         score = miniMax(board, depth + 1, 'X', -use, -pass);
-			allTries++;
+                        allTries++;
                         board[i][j] = temp;
                         if (score < bestScore) {
                             bestScore = score;
@@ -255,7 +264,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         }
                         if (pass <= use) {
                             break;
-                        } 
+                        }
                     }
                 }
             }
@@ -273,7 +282,7 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
                         char temp = board[i][j];
                         board[i][j] = 'O';
                         score = miniMax(board, depth + 1, 'X', -pass, -use);
-			allTries++;
+                        allTries++;
                         board[i][j] = temp;
                         if (score > bestScore) {
                             bestScore = score;
@@ -370,11 +379,13 @@ int main()
     pid = getpid();
     cout<<"T I C K -- T A C -- T O E -- G A M E" << endl;
     cout<<"FOR 2 PLAYERS" << endl;
+    int start_s = clock();
     while(gameover()){
         display_board();
         player_turn();
         gameover();
     }
+    int stop_s = clock();
     if(xWin){
         cout<<"Congratulations!Player with 'X' has won the game" << endl;
         display_board();
@@ -391,6 +402,9 @@ int main()
 
     cout << "Total tries for both players: " << totalTries << endl;
     cout << "Process ID for this program: " << pid << endl;
-    system("ps u");
+    cout << "Program took " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << " ms\n";
+    cout << "Time for player X : " << totalTime1 << " ms" << endl;
+    cout << "Time for player O : " << totalTime2 << " ms" << endl;
+    //system("ps u");
     return 0;
 }
