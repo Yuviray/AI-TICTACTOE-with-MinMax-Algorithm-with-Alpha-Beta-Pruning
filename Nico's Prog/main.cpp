@@ -22,6 +22,10 @@ int allTries = 0;
 int allTriesP = 0;
 int totalTries = 0;
 int totalTriesP = 0;
+int totalTriesX = 0;// nodes generated after pruning for x
+int totalTriesO = 0;// nodes generated after pruning for x
+int totalTriesXbP = 0; // nodes generated before pruning for x
+int totalTriesObP = 0;// nodes generated before pruning for o
 bool xWin = false;
 bool oWin = false;
 bool gameover();
@@ -57,10 +61,13 @@ void player_turn(){
         totalTime1 += (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
         cout << allTries << " Nodes Generated" << endl;
         totalTries += allTries;
+        totalTriesXbP += allTries;
         allTries = 0;
         cout << allTriesP << " Nodes Generated after Prune" << endl;
         totalTriesP += allTriesP;
+        totalTriesX +=allTriesP;
         allTriesP = 0;
+
 
     }
     else if(turn == 'O'){
@@ -71,9 +78,11 @@ void player_turn(){
         totalTime2 += (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000;
         cout << allTries << " Nodes Generated" << endl;
         totalTries += allTries;
+        totalTriesObP += allTries;
         allTries = 0;
         cout << allTriesP << " Nodes Generated after Prune" << endl;
         totalTriesP += allTriesP;
+        totalTriesO +=allTriesP;
         allTriesP = 0;
     }
 }
@@ -419,7 +428,11 @@ int main()
     }
 
     cout << "Total Nodes Generated for both players: " << totalTries << endl;
+    cout << "Total Nodes Generated for player X: " << totalTriesXbP << endl;
+    cout << "Total Nodes Generated for player O: " << totalTriesObP << endl;
     cout << "Total Nodes Generated after Pruning for both players: " << totalTriesP << endl;
+    cout << "Total Nodes Generated after Pruning for player X: " << totalTriesX << endl;
+    cout << "Total Nodes Generated after Pruning for player O: " << totalTriesO << endl;
     cout << "Process ID for this program: " << pid << endl;
     cout << "Program took " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << " ms\n";
     cout << "Time for player X : " << totalTime1 << " ms" << endl;
