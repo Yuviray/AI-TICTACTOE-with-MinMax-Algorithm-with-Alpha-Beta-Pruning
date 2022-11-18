@@ -430,12 +430,18 @@ int main()
     cout << "Total Nodes Generated for both players: " << totalTries << endl;
     cout << "Total Nodes Generated for player X: " << totalTriesXbP << endl;
     cout << "Total Nodes Generated for player O: " << totalTriesObP << endl;
+    cout << "Total memory used for player X: " << (totalTriesXbP*9)/1000 << " kbs" << endl;
+    cout << "Total memory used for player O: " << (totalTriesObP*9)/1000 << " kbs" << endl;
+
+    cout << "______________________________________________________________" << endl;
+
     cout << "Total Nodes Generated after Pruning for both players: " << totalTriesP << endl;
     cout << "Total Nodes Expanded after Pruning for player X: " << totalTriesX << endl;
     cout << "Total Nodes Expanded after Pruning for player O: " << totalTriesO << endl;
-    cout << "Total memory used for player X: " << (totalTriesXbP*9)/1000 << " kbs" << endl;
-    cout << "Total memory used for player O: " << (totalTriesObP*9)/1000 << " kbs" << endl;
-    cout << "Process ID for this program: " << pid << endl;
+    cout << "Total memory used after Pruning for player X: " << (totalTriesX*9)/1000 << " kbs" << endl;
+    cout << "Total memory used after Pruning for player O: " << (totalTriesO*9)/1000 << " kbs" << endl;
+    cout << "______________________________________________________________" << endl;
+    //cout << "Process ID for this program: " << pid << endl;
     cout << "Program took " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << " ms\n";
     cout << "Time for player X : " << totalTime1 << " ms" << endl;
     cout << "Time for player O : " << totalTime2 << " ms" << endl;
