@@ -1,9 +1,13 @@
+// Artificial Intelligence  CS 4346.001
+// Project 2 MinMax algorithm with alpha beta pruning
+// Team Members: Yuvanesh Rajamani, Nico Maldonado, John Edwards.
 #include <iostream>
 #include <cstdlib>
 #include <limits.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <fstream>
+#include <vector>
 
 
 using namespace std;
@@ -136,6 +140,7 @@ void bestMove(){
     draw = false;
 }
 
+// base evaluation shown in class
 int evaluate1(char board[3][3], char player, char opp){
     int maxi =0;
     int mini =0;
@@ -173,7 +178,8 @@ int evaluate1(char board[3][3], char player, char opp){
     return maxi-mini;
 }
 
-int evaluate2(char player){
+// Nicos practice evaluation
+int evaluate(char player){
     if(player == 'X') {
         if (xWin) {
             xWin = false;
@@ -197,7 +203,8 @@ int evaluate2(char player){
     }
 }
 
-int evaluate3(char board[3][3], char player, int depth){
+// Nicos  evaluation
+int evaluate2(char board[3][3], char player, int depth){
     if(player == 'X') {
         if (xWin) {
             xWin = false;
@@ -236,13 +243,257 @@ int evaluate3(char board[3][3], char player, int depth){
         }
     }
 }
+ // Johns evaluation
+int evaluate3(char board[3][3], char player, char opp) {
+    int MS_board[3][3] = {{8, 3, 4}, {1, 5, 9}, {6, 7, 2}};
+    vector<int> moves_p, moves_o, winMoves, lossMoves;
+
+    //accumulating the values for each player's moves
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (board[i][j] == player) {
+                moves_p.push_back(MS_board[i][j]);
+            }
+            if (board[i][j] == opp) {
+                moves_o.push_back(MS_board[i][j]);
+            }
+        }
+    }
+
+    //accumlating winning moves
+    if (moves_p.size() > 2) {
+        for (int i = 0; i < moves_p.size()-1; i++) {
+            for (int j = i+1; j < moves_p.size(); j++) {
+                int m = 15 - (moves_p[i] + moves_p[j]);
+                if (m > 0 && m < 10) {
+                    winMoves.push_back(m);
+                }
+            }
+        }
+    }
+    //accumulating losing moves
+    if (moves_o.size() > 2) {
+        for (int i = 0; i < moves_o.size()-1; i++) {
+            for (int j = i+1; j < moves_o.size(); j++) {
+                int m = 15 - (moves_o[i] + moves_o[j]);
+                if (m > 0 && m < 10) {
+                    lossMoves.push_back(m);
+                }
+            }
+        }
+    }
+    //evaluating the accumulated moves
+    //check for wins
+    if (winMoves.size() > 0) {
+        for (int i = 0; i < winMoves.size(); i++) {
+            for (int j = 0; j < moves_p.size(); j++) {
+                if (winMoves[i] == moves_p[j]) {
+                    return 1;
+                }
+            }
+        }
+    }
+    //check for losses
+    if (lossMoves.size() > 0) {
+        for (int i = 0; i < lossMoves.size(); i++) {
+            for (int j = 0; j < moves_o.size(); j++) {
+                if (lossMoves[i] == moves_o[j]) {
+                    return -1;
+                }
+            }
+        }
+    }
+    //return 0 if no win or loss
+    return 0;
+}
+
+// Yuvanesh evaluation
+// this function evaluated the board by count the win possibilities for 2 of the same pieces in a row/col/diagonal
+// and also for 1 piece in a row/col/diagonal
+// this is also static
+int evaluate4(char board[3][3], char player, char opp){
+    int x2 =0;
+    int o2 =0;
+    int x1=0;
+    int o1 =0;
+
+    char opponent = opp;
+    for(int row =0; row < 3; row++){
+        // checks for win possibilities for 2 pieces on board
+        if(board[row][0]== player   && board[row][1]== player  && board[row][2]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[row][1]== player   && board[row][2]== player  && board[row][0]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[row][0]== player   && board[row][2]== player  && board[row][1]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[row][0]== opponent   && board[row][1]== opponent  && board[row][2]!= (opponent||player) ){
+            o2++;
+        }
+        if(board[row][1]== opponent   && board[row][2]== opponent  && board[row][0]!= (opponent||player) ){
+            o2++;
+        }
+        if(board[row][0]== opponent   && board[row][2]== opponent  && board[row][1]!= (opponent||player) ){
+            o2++;
+        }
+
+        // checks for win possibilities for 1 piece on board
+        if(board[row][0]== player   && board[row][1]!= (opponent||player)  && board[row][2]!= (opponent||player) ){
+            x1++;
+        }
+        if(board[row][1]== player  && board[row][0]!= (opponent||player)  && board[row][2]!= (opponent||player) ) {
+            x1++;
+        }
+        if(board[row][2]== player   && board[row][1]!= (opponent||player)  && board[row][0]!= (opponent||player) ) {
+            x1++;
+        }
+        if(board[row][0]== opponent   && board[row][1]!= (opponent||player)  && board[row][2]!= (opponent||player) ){
+            o1++;
+        }
+        if(board[row][1]== opponent  && board[row][0]!= (opponent||player)  && board[row][2]!= (opponent||player) ) {
+            o1++;
+        }
+        if(board[row][2]== opponent   && board[row][1]!= (opponent||player)  && board[row][0]!= (opponent||player) ) {
+            o1++;
+        }
+    }
+    for(int col =0; col<3; col++){
+        // checks for win possibilities for 2 pieces on board
+        if(board[0][col] == player  && board[1][col]== player  && board[2][col]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[1][col] == player  && board[2][col]== player  && board[0][col]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[2][col] == player  && board[0][col]== player  && board[1][col]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[0][col] == opponent  && board[1][col]== opponent  && board[2][col]!= (opponent||player) ){
+            o2++;
+        }
+        if(board[0][col] == opponent  && board[2][col]== opponent  && board[1][col]!= (opponent||player) ){
+            o2++;
+        }
+        if(board[2][col] == opponent  && board[1][col]== opponent  && board[0][col]!= (opponent||player) ){
+            o2++;
+        }
+        // checks for win possibilities for 1 piece on board
+        if(board[0][col] == player  && board[1][col]!= (opponent||player) && board[2][col]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[1][col] == player  && board[2][col]!= (opponent||player)  && board[1][col]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[2][col] == player  && board[1][col]!= (opponent||player)  && board[0][col]!= (opponent||player) ){
+            x2++;
+        }
+        if(board[0][col] == opponent  && board[1][col]!= (opponent||player)  && board[2][col]!= (opponent||player) ){
+            o2++;
+        }
+        if(board[1][col] == opponent  && board[2][col]!= (opponent||player)  && board[0][col]!= (opponent||player) ){
+            o2++;
+        }
+        if(board[2][col] == opponent  && board[1][col]!= (opponent||player) && board[0][col]!= (opponent||player) ){
+            o2++;
+        }
+    }
+    // checks for win possibilities for 2 pieces on board
+    if(board[2][2] == player  && board[1][1]== player && board[0][0]!= (opponent||player) ){
+        x2++;
+    }
+    if(board[0][0] == player  && board[2][2]== player && board[1][1]!= (opponent||player) ){
+        x2++;
+    }
+    if(board[0][0] == player  && board[1][1]== player && board[2][2]!= (opponent||player) ){
+        x2++;
+    }
+    if(board[2][2] == opponent  && board[1][1]== opponent && board[0][0]!= (opponent||player) ){
+        o2++;
+    }
+    if(board[0][0] == opponent  && board[2][2]== opponent && board[1][1]!= (opponent||player) ){
+        o2++;
+    }
+    if(board[0][0] == opponent  && board[1][1]== opponent && board[2][2]!= (opponent||player) ){
+        o2++;
+    }
+    //other diagonal
+
+    if(board[2][0] == player  && board[1][1]== player && board[0][2]!= (opponent||player) ){
+        x2++;
+    }
+    if(board[0][2] == player  && board[2][0]== player && board[1][1]!= (opponent||player) ){
+        x2++;
+    }
+    if(board[0][2] == player  && board[1][1]== player && board[2][0]!= (opponent||player) ){
+        x2++;
+    }
+    if(board[2][0] == opponent  && board[1][1]== opponent && board[0][2]!= (opponent||player) ){
+        o2++;
+    }
+    if(board[0][2] == opponent  && board[2][0]== opponent && board[1][1]!= (opponent||player) ){
+        o2++;
+    }
+    if(board[0][2] == opponent  && board[1][1]== opponent && board[2][0]!= (opponent||player) ){
+        o2++;
+    }
+
+    // checks for win possibilities for 1 piece on board
+    if(board[2][2] == player  && board[1][1]!= (opponent||player) && board[0][0]!= (opponent||player) ){
+        x1++;
+    }
+    if(board[0][0] == player  && board[2][2]!= (opponent||player) && board[1][1]!= (opponent||player) ){
+        x1++;
+    }
+    if(board[1][1] == player  && board[0][0]!= (opponent||player) && board[2][2]!= (opponent||player) ){
+        x1++;
+    }
+    if(board[2][2] == opponent  && board[1][1]!= (opponent||player) && board[0][0]!= (opponent||player) ){
+        o1++;
+    }
+    if(board[0][0] == opponent  && board[2][2]!= (opponent||player) && board[1][1]!= (opponent||player) ){
+        o1++;
+    }
+    if(board[1][1] == opponent  && board[0][0]!= (opponent||player) && board[2][2]!= (opponent||player) ){
+        o1++;
+    }
+    //other diagonal
+
+    if(board[2][0] == player  && board[1][1]!= (opponent||player) && board[0][2]!= (opponent||player) ){
+        x1++;
+    }
+    if(board[0][2] == player  && board[2][0]!= (opponent||player)&& board[1][1]!= (opponent||player) ){
+        x1++;
+    }
+    if(board[1][1] == player  && board[0][2]!= (opponent||player) && board[2][0]!= (opponent||player) ){
+        x1++;
+    }
+    if(board[2][0] == opponent  && board[1][1]!= (opponent||player) && board[0][2]!= (opponent||player) ){
+        o1++;
+    }
+    if(board[0][2] == opponent  && board[2][0]!= (opponent||player) && board[1][1]!= (opponent||player) ){
+        o1++;
+    }
+    if(board[1][1] == opponent  && board[0][2]!= (opponent||player) && board[2][0]!= (opponent||player) ){
+        o1++;
+    }
+    return 2*x2+x1-2*o2-o1;
+}
+
+
 
 int miniMax(char board[3][3], int depth, char player, int use, int pass){
     int score;
     int bestScore;
     if(turn == 'X') {
-        if(!gameover()) {
-            return evaluate3(board,'X',depth);
+        if(!gameover()) { // uncomment the return statement depending on which evaluation
+            return evaluate1(board, 'X','O');
+            // return evaluate('X');
+            // return evaluate2(board,'X',depth);
+            // return evaluate3(board, 'X','O');
+            // return evaluate4(board,'X','O');
+
         }
         if (player == 'X') {
             bestScore = -INT_MAX;
@@ -295,8 +546,13 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
             return bestScore;
         }
     }else if (turn == 'O'){
-        if (!gameover()) {
-            return evaluate3(board,'O',depth);
+        if (!gameover()) {// uncomment the return statement depending on which evaluation
+            return evaluate1(board, 'X','O');
+           // return evaluate('O');
+           // return evaluate2(board,'O',depth);
+           // return evaluate3(board, 'X','O');
+           // return evaluate4(board,'X','O');
+
         }
         if (player == 'O') {
             bestScore = -INT_MAX;
@@ -355,31 +611,37 @@ int miniMax(char board[3][3], int depth, char player, int use, int pass){
 bool gameover(){
     //checking the win for Simple Rows and Simple Column
 
-    if ((board[0][0] == 'X' && board[0][1] == 'X' && board[0][2] == 'X') || (board[1][0] == 'X' && board[1][1] == 'X' && board[1][2] == 'X')
+    if ((board[0][0] == 'X' && board[0][1] == 'X' && board[0][2] == 'X')
+        || (board[1][0] == 'X' && board[1][1] == 'X' && board[1][2] == 'X')
         || (board[2][0] == 'X' && board[2][1] == 'X' && board[2][2] == 'X')) {
         xWin = true;
         return false;
-    } else if ((board[0][0] == 'O' && board[0][1] == 'O' && board[0][2] == 'O') || (board[1][0] == 'O' && board[1][1] == 'O' && board[1][2] == 'O')
-               || (board[2][0] == 'O' && board[2][1] == 'O' && board[2][2] == 'O')) {
+    } else if ((board[0][0] == 'O' && board[0][1] == 'O' && board[0][2] == 'O')
+        || (board[1][0] == 'O' && board[1][1] == 'O' && board[1][2] == 'O')
+        || (board[2][0] == 'O' && board[2][1] == 'O' && board[2][2] == 'O')) {
         oWin = true;
         return false;
     }
 
-    if ((board[0][0] == 'X' && board[1][0] == 'X' && board[2][0] == 'X') || (board[0][1] == 'X' && board[1][1] == 'X' && board[2][1] == 'X')
+    if ((board[0][0] == 'X' && board[1][0] == 'X' && board[2][0] == 'X')
+        || (board[0][1] == 'X' && board[1][1] == 'X' && board[2][1] == 'X')
         || (board[0][2] == 'X' && board[1][2] == 'X' && board[2][2] == 'X')) {
         xWin = true;
         return false;
-    } else if ((board[0][0] == 'O' && board[1][0] == 'O' && board[2][0] == 'O') || (board[0][1] == 'O' && board[1][1] == 'O' && board[2][1] == 'O')
-               || (board[0][2] == 'O' && board[1][2] == 'O' && board[2][2] == 'O')) {
+    } else if ((board[0][0] == 'O' && board[1][0] == 'O' && board[2][0] == 'O')
+        || (board[0][1] == 'O' && board[1][1] == 'O' && board[2][1] == 'O')
+        || (board[0][2] == 'O' && board[1][2] == 'O' && board[2][2] == 'O')) {
         oWin = true;
         return false;
     }
 
     //checking the win for both diagonal
-    if ((board[0][0] == 'X' && board[1][1] == 'X' && board[2][2] == 'X') || (board[0][2] == 'X' && board[1][1] == 'X' && board[2][0] == 'X')){
+    if ((board[0][0] == 'X' && board[1][1] == 'X' && board[2][2] == 'X')
+        || (board[0][2] == 'X' && board[1][1] == 'X' && board[2][0] == 'X')){
         xWin = true;
         return false;
-    } else if ((board[0][0] == 'O' && board[1][1] == 'O' && board[2][2] == 'O') || (board[0][2] == 'O' && board[1][1] == 'O' && board[2][0] == 'O')) {
+    } else if ((board[0][0] == 'O' && board[1][1] == 'O' && board[2][2] == 'O')
+        || (board[0][2] == 'O' && board[1][1] == 'O' && board[2][0] == 'O')) {
         oWin = true;
         return false;
     }else{
@@ -445,8 +707,6 @@ int main()
     cout << "Program took " << (stop_s-start_s)/double(CLOCKS_PER_SEC)*1000 << " ms\n";
     cout << "Time for player X : " << totalTime1 << " ms" << endl;
     cout << "Time for player O : " << totalTime2 << " ms" << endl;
-
-
 
     //system("ps u");
     return 0;
